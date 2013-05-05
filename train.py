@@ -28,8 +28,8 @@ class NeuralNet():
         self.weightsI = self.generateWeights(len(self.nodesI),len(self.nodesH)-1)
         self.weightsH = self.generateWeights(len(self.nodesH),len(self.nodesO))
 
-        self.errorsI = [1.0] * (inp + 1)
-        self.errorsH = [1.0] * (hidden + 1)
+        self.errorsI = [1.0] * inp
+        self.errorsH = [1.0] * hidden
         self.errorsO = [1.0] * out #no hidden node
 
     def generateWeights(self,first,second):
@@ -41,7 +41,7 @@ class NeuralNet():
     def train(self, examples):
         for example in examples:
             #input layer becomes input and the bias node is at 0
-            self.nodesI = [self.nodesI[0], example[0],example[1]]
+            self.nodesI = [example[0],example[1],self.nodesI[2]]
 
             #skip input Layer
 
@@ -81,12 +81,11 @@ class NeuralNet():
             for oNode in range(len(self.nodesO)):
 #                print "adding error of output", oNode
 #                print "adding error of output", self.errorsO[oNode]
-                errorSum = errorSum +(self.weightsH[hNode][oNode]* self.errorsO[oNode])
+                errorSum = errorSum +(self.weightsH[hNode][oNode] * self.errorsO[oNode])
             self.errorsH[hNode] = errorSum * (node)*(1-node)
 #        print self.weightsH
-#        print self.errorsH
 
-        for iNode in range(0,len(self.nodesI)):
+        for iNode in range(len(self.nodesI)-1):
             node = self.nodesI[iNode]
             errorSum = 0
             #because it doesn't link to the bias node
@@ -100,18 +99,15 @@ class NeuralNet():
                 error = 0.1 * self.errorsO[oNode] * self.nodesH[hNode]
                 self.weightsH[hNode][oNode] =self.weightsH[hNode][oNode] - error
 
-        for iNode in range(1,len(self.nodesI)):
+        for iNode in range(len(self.nodesI)-1):
             for hNode in range(len(self.nodesH)-1):
                 error = 0.1 * self.errorsH[hNode] * self.nodesI[iNode]
                 self.weightsI[iNode][hNode] =self.weightsI[iNode][hNode] - error
 
     def getError(self):
-        print "--------"
-        print self.nodesO
-        print self.errorsO
-        return reduce(lambda x, y: x+(y**2), self.errorsO) + \
-               reduce(lambda x, y: x+(y**2), self.errorsI)  + \
-               reduce(lambda x, y: x+(y**2), self.errorsH)
+        return reduce(lambda x, y: x+(y**2),self.errorsO, 0) + \
+               reduce(lambda x, y: x+(y**2),self.errorsI, 0)  + \
+               reduce(lambda x, y: x+(y**2),self.errorsH, 0)
 
     def classify(self, example):
 
@@ -137,21 +133,14 @@ def getTrainingSet():
         testVectors.append((float(aList[0]),float(aList[1]),int(aList[2])))
     return testVectors
 
-nn = pickle.load(open('nntest.pkl', 'rb'))
-testVectors = getTrainingSet()
-#print nn
-nn.train(testVectors)
-#nn.train(testVectors[0:1])
-
-#
 def main():
-    nn = pickle.load(open('nntest.pkl', 'rb'))
+    nn = NeuralNet(2,5,4)
     testVectors = getTrainingSet()
 
-    for epoch in range(0, 1001):
+    for epoch in range(0, 10001):
         nn.train(testVectors)
-        print(nn.getError())
         if epoch in [10**x for x in range(5)]:
+            print("Epoch "+epoch+": " + str(nn.getError()))
             #store pickle of NN
             output = open('nn'+str(epoch)+'.pkl', 'wb')
             pickle.dump(nn, output)
