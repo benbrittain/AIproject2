@@ -4,7 +4,6 @@ import random
 import math
 
 class NeuralNet():
-#    __slots__('inp','hidden','out','weights')
     def __str__(self):
         stri = "\n"
         stri = stri + "Input Layer" + str(self.nodesI)
@@ -29,8 +28,11 @@ class NeuralNet():
         self.weightsI = self.generateWeights(self.nodesI,self.nodesH)
         self.weightsH = self.generateWeights(self.nodesH,self.nodesO)
 
-        self.errorsI = [[0]*len(self.nodesH) for x in range(len(self.nodesI))]
-        self.errorsH = [[0]*len(self.nodesO) for x in range(len(self.nodesH))]
+        self.errorsI = [1.0] * (inp + 1)
+        self.errorsH = [1.0] * (hidden + 1)
+        self.errorsO = [1.0] * out #no hidden node
+       # self.errorsI = [[0]*len(self.nodesH) for x in range(len(self.nodesI))]
+       # self.errorsH = [[0]*len(self.nodesO) for x in range(len(self.nodesH))]
 
     def generateWeights(self,first,second):
         vector = list()
@@ -70,9 +72,25 @@ class NeuralNet():
             self.backProp(example)
 
     def backProp(self, example):
-        #error!
-        pass
-            
+        for oNode in range(len(self.nodesO)):
+            node = self.nodesO[oNode]
+            self.errorsO[oNode] = node * (example[2] - node)
+
+        for hNode in range(0,len(self.nodesH)):
+            node = self.nodesH[hNode]
+            errorSum = 0
+            for oNode in range(len(self.nodesO)):
+                errorSum = errorSum + (self.errorsO[oNode] * self.weightsH[hNode][oNode])
+            errorSum = errorSum * self.nodesH[hNode] * (1 - self.nodesH[hNode])
+            self.errorsH[hNode] = errorSum
+
+        for iNode in range(0,len(self.nodesI)):
+            node = self.nodesI[iNode]
+            errorSum = 0
+            for hNode in range(len(self.nodesH)):
+                errorSum = errorSum + (self.errorsH[hNode] * self.weightsI[iNode][hNode])
+            errorSum = errorSum * self.nodesI[iNode] * (1 - self.nodesI[iNode])
+            self.errorsI[iNode] = errorSum
 
     def getError(self):
         total = 0
@@ -85,7 +103,8 @@ class NeuralNet():
 def sigmoid(x):
     return (1/(1+(math.e**(-x))))
 
-
+def sigDeriv(x):
+    return (sigmoid(x)*(1-sigmoid(x)))
 
 def main():
     nn = NeuralNet(2,5,4)
