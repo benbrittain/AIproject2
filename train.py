@@ -41,7 +41,7 @@ class NeuralNet():
         return vector
 
     def train(self, examples):
-        for example in examples[0:10]:
+        for example in examples:
             print("--------- new example --------")
             print example
             #input layer becomes input and the bias node is at 0
@@ -75,7 +75,6 @@ class NeuralNet():
         for oNode in range(len(self.nodesO)):
             node = self.nodesO[oNode]
             self.errorsO[oNode] = node * (example[2] - node)
-
         for hNode in range(0,len(self.nodesH)):
             node = self.nodesH[hNode]
             errorSum = 0
@@ -83,7 +82,6 @@ class NeuralNet():
                 errorSum = errorSum + (self.errorsO[oNode] * self.weightsH[hNode][oNode])
             errorSum = errorSum * self.nodesH[hNode] * (1 - self.nodesH[hNode])
             self.errorsH[hNode] = errorSum
-
         for iNode in range(0,len(self.nodesI)):
             node = self.nodesI[iNode]
             errorSum = 0
@@ -91,13 +89,25 @@ class NeuralNet():
                 errorSum = errorSum + (self.errorsH[hNode] * self.weightsI[iNode][hNode])
             errorSum = errorSum * self.nodesI[iNode] * (1 - self.nodesI[iNode])
             self.errorsI[iNode] = errorSum
+        
+        # update the weights now
+        for hNode in range(len(self.nodesH)):
+            for oNode in range(len(self.nodesO)):
+                error = 0.1 * self.errorsO[oNode] * self.nodesH[hNode]
+                self.weightsH[hNode][oNode] =self.weightsH[hNode][oNode] - error
+
+        for iNode in range(len(self.nodesI)):
+            for hNode in range(len(self.nodesH)):
+                error = 0.1 * self.errorsH[hNode] * self.nodesI[iNode]
+                self.weightsI[iNode][hNode] =self.weightsI[iNode][hNode] - error
+
+
 
     def getError(self):
         total = 0
-        for row in self.errorsI:
-            total = total + reduce(lambda x, y: x+(y**2), row)
-        for row in self.errorsH:
-            total = total + reduce(lambda x, y: x+(y**2), row)
+        total = total + reduce(lambda x, y: x+(y**2), self.errorsO)
+        total = total + reduce(lambda x, y: x+(y**2), self.errorsI)
+        total = total + reduce(lambda x, y: x+(y**2), self.errorsH)
         return total
 
 def sigmoid(x):
@@ -108,9 +118,13 @@ def sigDeriv(x):
 
 def main():
     nn = NeuralNet(2,5,4)
+    print(nn)
     testVectors = getTrainingSet()
+    nn.train(testVectors)
+    print( nn.getError())
+    print(nn)
     for epoch in range(0, 1):
-        nn.train(testVectors)
+        #nn.train(testVectors)
 
         if epoch in [10**x for x in range(5)]:
             #store pickle of NN
