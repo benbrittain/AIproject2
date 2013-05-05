@@ -31,8 +31,6 @@ class NeuralNet():
         self.errorsI = [1.0] * (inp + 1)
         self.errorsH = [1.0] * (hidden + 1)
         self.errorsO = [1.0] * out #no hidden node
-       # self.errorsI = [[0]*len(self.nodesH) for x in range(len(self.nodesI))]
-       # self.errorsH = [[0]*len(self.nodesO) for x in range(len(self.nodesH))]
 
     def generateWeights(self,first,second):
         vector = list()
@@ -42,8 +40,6 @@ class NeuralNet():
 
     def train(self, examples):
         for example in examples:
-            print("--------- new example --------")
-            print example
             #input layer becomes input and the bias node is at 0
             self.nodesI = [self.nodesI[0], example[0],example[1]]
 
@@ -106,6 +102,40 @@ class NeuralNet():
                reduce(lambda x, y: x+(y**2), self.errorsI)  + \
                reduce(lambda x, y: x+(y**2), self.errorsH)
 
+    def classify(self, example):
+
+       #input layer becomes input and the bias node is at 0
+       self.nodesI = [self.nodesI[0], example[0],example[1]]
+
+       #skip input Layer
+
+       #skip bias node aka hl,0
+       for hnode in range(1,len(self.nodesH)):
+           sumation = 0
+           #for every node in the input Layer
+           for inNode in range(len(self.nodesI)):
+               #sum them up with their weight to the node in the hidden layer
+               weight =(self.weightsI[inNode][hnode]) 
+               sumation = sumation + self.nodesI[inNode] * weight
+           self.nodesH[hnode] = sigmoid(sumation)
+
+       #for every output node, no bias one
+       for onode in range(0,len(self.nodesO)):
+           sumation = 0
+           #for every node in the hidden Layer
+           for hidNode in range(len(self.nodesH)):
+               weight =(self.weightsH[hidNode][onode]) 
+               sumation = sumation + self.nodesH[hidNode] * weight
+           self.nodesO[onode] = sigmoid(sumation)
+
+       current = float("-inf")
+       classify = -1
+       for oNode in range(0,len(self.nodesO)):
+            if self.nodesO[oNode] > current:
+              classify = oNode
+              current = self.nodesO[oNode]
+       return classify
+
 def sigmoid(x):
     return (1/(1+(math.e**(-x))))
 
@@ -114,14 +144,11 @@ def sigDeriv(x):
 
 def main():
     nn = NeuralNet(2,5,4)
-    print(nn)
     testVectors = getTrainingSet()
-    nn.train(testVectors)
-    print(nn.getError())
-    print(nn)
-    for epoch in range(0, 1):
-        #nn.train(testVectors)
 
+    for epoch in range(0, 1001):
+        nn.train(testVectors)
+        print(nn.getError())
         if epoch in [10**x for x in range(5)]:
             #store pickle of NN
             output = open('nn'+str(epoch)+'.pkl', 'wb')
@@ -132,12 +159,13 @@ def main():
 ####
 
 def getTrainingSet():
-    random.seed(42)
     fin = open('train_data.csv')
     testVectors = []
     for line in fin:
         aList = line.strip().split(',')
         testVectors.append((float(aList[0]),float(aList[1]),int(aList[2])))
     return testVectors
-main()
 
+if __name__ == "__main__":
+    random.seed(42)
+    main()
