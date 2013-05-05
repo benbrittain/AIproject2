@@ -101,14 +101,10 @@ class NeuralNet():
                 error = 0.1 * self.errorsH[hNode] * self.nodesI[iNode]
                 self.weightsI[iNode][hNode] =self.weightsI[iNode][hNode] - error
 
-
-
     def getError(self):
-        total = 0
-        total = total + reduce(lambda x, y: x+(y**2), self.errorsO)
-        total = total + reduce(lambda x, y: x+(y**2), self.errorsI)
-        total = total + reduce(lambda x, y: x+(y**2), self.errorsH)
-        return total
+        return reduce(lambda x, y: x+(y**2), self.errorsO) + \
+               reduce(lambda x, y: x+(y**2), self.errorsI)  + \
+               reduce(lambda x, y: x+(y**2), self.errorsH)
 
 def sigmoid(x):
     return (1/(1+(math.e**(-x))))
@@ -121,7 +117,7 @@ def main():
     print(nn)
     testVectors = getTrainingSet()
     nn.train(testVectors)
-    print( nn.getError())
+    print(nn.getError())
     print(nn)
     for epoch in range(0, 1):
         #nn.train(testVectors)
