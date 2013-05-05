@@ -23,7 +23,7 @@ def generateClassification(nn):
     ring = [[],[]]
     junk= [[],[]]
     
-    fine = 1000
+    fine = 1000 
     for x in range(fine):
         for y in range(fine):
             newX = x/float(fine) 
@@ -42,10 +42,10 @@ def generateClassification(nn):
                 junk[0].append(newX)
                 junk[1].append(newY)
 
-    plt.plot(bolt[0],bolt[1],'ro')
-    plt.plot(nut[0],nut[1],'bo')
-    plt.plot(ring[0],ring[1],'go')
-    plt.plot(junk[0],junk[1],'yo')
+    plt.plot(bolt[0],bolt[1],'r,')
+    plt.plot(nut[0],nut[1],'b,')
+    plt.plot(ring[0],ring[1],'g,')
+    plt.plot(junk[0],junk[1],'y,')
 
     plt.title('Classification Regions')
     plt.ylabel('Symmetry')
