@@ -11,8 +11,47 @@ def main():
 
     testData = getTestSet(sys.argv[2])
     for test in testData:
-        print(test[2], nn.classify(test))
+        print test[0],test[1]
+        print(test[2], nn.classify(test[0],test[1]))
 
+    generateClassification(nn)
+
+
+def generateClassification(nn):
+    bolt = [[],[]]
+    nut = [[],[]]
+    ring = [[],[]]
+    junk= [[],[]]
+    
+    fine = 1000
+    for x in range(fine):
+        for y in range(fine):
+            newX = x/float(fine) 
+            newY = y/float(fine) 
+            itemClass = nn.classify(newX,newY)
+            if (itemClass == 1):
+                bolt[0].append(newX)
+                bolt[1].append(newY)
+            if (itemClass == 2):
+                nut[0].append(newX)
+                nut[1].append(newY)
+            if (itemClass == 3):
+                ring[0].append(newX)
+                ring[1].append(newY)
+            if (itemClass == 4):
+                junk[0].append(newX)
+                junk[1].append(newY)
+
+    plt.plot(bolt[0],bolt[1],'ro')
+    plt.plot(nut[0],nut[1],'bo')
+    plt.plot(ring[0],ring[1],'go')
+    plt.plot(junk[0],junk[1],'yo')
+
+    plt.title('Classification Regions')
+    plt.ylabel('Symmetry')
+    plt.xlabel('Eccentricity')
+
+    plt.show()
 def getTestSet(fileString):
     fin = open(fileString)
     testVectors = []

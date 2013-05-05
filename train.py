@@ -114,8 +114,8 @@ class NeuralNet():
                reduce(lambda x, y: x+(y**2),self.errorsI, 0)  + \
                reduce(lambda x, y: x+(y**2),self.errorsH, 0)
 
-    def classify(self, example):
-        self.nodesI = [example[0],example[1],self.nodesI[2]]
+    def classify(self, ecc, sym):
+        self.nodesI = [ecc,sym,self.nodesI[2]]
 
         #skip bias node aka hl,0
         for hnode in range(len(self.nodesH)-1):
@@ -163,7 +163,7 @@ def main():
     epochs = []
     points = []
     
-    for epoch in range(0, 10001):
+    for epoch in range(0, 100001):
         nn.train(testVectors)
         epochs.append(epoch)
         points.append(nn.getError())
