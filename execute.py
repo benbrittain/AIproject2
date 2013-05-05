@@ -10,7 +10,6 @@ def main():
     nn = pickle.load(open(nnFile,'rb'))
 
     testData = getTestSet(sys.argv[2])
-
     for test in testData:
         print(test[2], nn.classify(test))
 
