@@ -10,20 +10,51 @@ def main():
     nn = pickle.load(open(nnFile,'rb'))
 
     testData = getTestSet(sys.argv[2])
-    for test in testData:
-        print test[0],test[1]
-        print(test[2], nn.classify(test[0],test[1]))
 
+    stdOut(nn,testData)
+    confusionMatrix(nn,testData)
+    print "\n Now Generating Classification Regions, please wait a few seconds \n"
     generateClassification(nn)
 
+def stdOut(nn,samples):
+    profit = 0
+    count = 0
+    profitMatrix = [[0.2, -.07, -.07, -.07],
+                    [-.07, 0.15, -.07, -.07],
+                    [-.07, -.07, .05, -.07],
+                    [-.03,-.03,-.03,-.03]]
+    for sample in samples:
+        classify = nn.classify(sample[0],sample[1]) -1
+        correct = sample[2] -1
+        if classify != correct:
+            count = count + 1
+        profit = profit + profitMatrix[classify][correct]
+    print("Classification Errors: " + str(count))
+    correct =  (((len(samples)-count)*1.0)/len(samples))
+    print("Recognition Rate: " + str((correct*100)) + "%")
+    print("Profit Obtained: " + str(profit))
+        
+    
+def confusionMatrix(nn,samples):
+    matrix = [[0,0,0,0] for x in range(4)]
+    for sample in samples:
+        classified = nn.classify(sample[0],sample[1]) - 1
+        correct = sample[2] - 1
+        matrix[correct][classified] = matrix[correct][classified] + 1
 
+    matrixClass = ["bolt", "nut", "ring", "scrap"]
+    rowFormat ="{:>10}" * (len(matrixClass) + 1)
+    print rowFormat.format("", *matrixClass)
+    for classification, row in zip(matrixClass, matrix):
+        print rowFormat.format(classification, *row)
+    
 def generateClassification(nn):
     bolt = [[],[]]
     nut = [[],[]]
     ring = [[],[]]
     junk= [[],[]]
     
-    fine = 1000 
+    fine = 750
     for x in range(fine):
         for y in range(fine):
             newX = x/float(fine) 

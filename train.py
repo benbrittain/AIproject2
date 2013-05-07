@@ -163,7 +163,7 @@ def main():
     epochs = []
     points = []
     
-    for epoch in range(0, 100001):
+    for epoch in range(0, 10001):
         nn.train(testVectors)
         epochs.append(epoch)
         points.append(nn.getError())
@@ -173,7 +173,7 @@ def main():
 
             plt.xlabel('Epoch')
             plt.ylabel('SSD')
-            plt.title('less stupid network')
+            plt.title('Epoch ' + str(epoch))
             plt.plot(epochs,points)
             plt.show()
 
